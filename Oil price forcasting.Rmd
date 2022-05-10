@@ -1,0 +1,179 @@
+---
+  title: "Project Knowladge mining"
+author: "Selam Muluneh"
+date: "5/9/2022"
+output: html_document
+---
+
+DataOil=read.csv("C:/Users/Selam1/Desktop/Spring 2022/EPPS6323 Knowledge Mining/Oil price forcasting/CombineddataR2022.csv")
+
+sum(is.na(DataOil))
+
+-----------------------------------
+  
+  MiddleEast = read.csv("C:\\Users\\Selam1\\Desktop\\Spring 2022\\EPPS6323 Knowledge Mining\\Oil price forcasting\\MiddleEast_2015-2022_Apr22.csv")
+MiddleEast$EVENT_DATE <- as.Date(MiddleEast$EVENT_DATE,format="%d-%B-%Y")
+MiddleEast$month <- format(as.Date(MiddleEast$EVENT_DATE), "%m")
+MiddleEast$Month_Yr <- format(as.Date(MiddleEast$EVENT_DATE), "%Y-%m")
+
+
+
+MiddleEast_aggr <- MiddleEast %>%                         # Aggregate data
+  group_by(Month_Yr) %>% 
+  dplyr::summarize(value = sum(FATALITIES)) %>% 
+  as.data.frame()
+head(MiddleEast_aggr)
+
+
+------------------------------------
+  
+  Africa = read.csv("C:\\Users\\Selam1\\Desktop\\Spring 2022\\EPPS6323 Knowledge Mining\\Oil price forcasting\\Africa_1997-2022_Apr22.csv")
+Africa$EVENT_DATE <- as.Date(Africa$EVENT_DATE,format="%d-%B-%Y")
+Africa$month <- format(as.Date(Africa$EVENT_DATE), "%m")
+Africa$Month_Yr <- format(as.Date(Africa$EVENT_DATE), "%Y-%m")
+head(Africa)
+
+Africa_aggr <- Africa %>%                         # Aggregate data
+  group_by(Month_Yr) %>% 
+  dplyr::summarize(value = sum(FATALITIES)) %>% 
+  as.data.frame()
+tail(Africa_aggr)
+
+
+------------------------------------
+  LatinAmerica = read.csv("C:\\Users\\Selam1\\Desktop\\Spring 2022\\EPPS6323 Knowledge Mining\\Oil price forcasting\\LatinAmerica_2018-2022_Apr22.csv")
+LatinAmerica$EVENT_DATE <- as.Date(LatinAmerica$EVENT_DATE,format="%d-%B-%Y")
+LatinAmerica$month <- format(as.Date(LatinAmerica$EVENT_DATE), "%m")
+LatinAmerica$Month_Yr <- format(as.Date(LatinAmerica$EVENT_DATE), "%Y-%m")
+head(LatinAmerica)
+
+LatinAmerica_aggr <- LatinAmerica %>%                         # Aggregate data
+  group_by(Month_Yr) %>% 
+  dplyr::summarize(value = sum(FATALITIES)) %>% 
+  as.data.frame()
+head(LatinAmerica_aggr)
+
+----------------------
+  Europe = read.csv("C:\\Users\\Selam1\\Desktop\\Spring 2022\\EPPS6323 Knowledge Mining\\Oil price forcasting\\Europe_2018-2022_Apr22.csv")
+Europe$EVENT_DATE <- as.Date(Europe$EVENT_DATE,format="%d-%B-%Y")
+Europe$month <- format(as.Date(Europe$EVENT_DATE), "%m")
+Europe$Month_Yr <- format(as.Date(Europe$EVENT_DATE), "%Y-%m")
+head(Europe)
+
+Europe_aggr <- Europe %>%                         # Aggregate data
+  group_by(Month_Yr) %>% 
+  dplyr::summarize(value = sum(FATALITIES)) %>% 
+  as.data.frame()
+tail(Europe_aggr)
+
+----------------------
+  NorthAmerica = read.csv("C:\\Users\\Selam1\\Desktop\\Spring 2022\\EPPS6323 Knowledge Mining\\Oil price forcasting\\NorthAmerica_2020_2022_Apr22.csv")
+NorthAmerica$EVENT_DATE <- as.Date(NorthAmerica$EVENT_DATE,format="%d-%B-%Y")
+NorthAmerica$month <- format(as.Date(NorthAmerica$EVENT_DATE), "%m")
+NorthAmerica$Month_Yr <- format(as.Date(NorthAmerica$EVENT_DATE), "%Y-%m")
+tail(NorthAmerica)
+
+NorthAmerica_aggr <- NorthAmerica %>%                         # Aggregate data
+  group_by(Month_Yr) %>% 
+  dplyr::summarize(value = sum(FATALITIES)) %>% 
+  as.data.frame()
+head(NorthAmerica_aggr)
+
+----------------------
+  SouthAsia = read.csv("C:\\Users\\Selam1\\Desktop\\Spring 2022\\EPPS6323 Knowledge Mining\\Oil price forcasting\\SouthAsia_2010-2022_Apr22_updated.csv")
+SouthAsia$EVENT_DATE <- as.Date(SouthAsia$EVENT_DATE,format="%d-%B-%Y")
+SouthAsia$month <- format(as.Date(SouthAsia$EVENT_DATE), "%m")
+SouthAsia$Month_Yr <- format(as.Date(SouthAsia$EVENT_DATE), "%Y-%m")
+head(SouthAsia)
+
+SouthAsia_aggr <- SouthAsia %>%                         # Aggregate data
+  group_by(Month_Yr) %>% 
+  dplyr::summarize(value = sum(FATALITIES)) %>% 
+  as.data.frame()
+tail(SouthAsia_aggr)
+
+----------------------
+  Conflict_agg <- list(MiddleEast_aggr, Africa_aggr, LatinAmerica_aggr,SouthAsia_aggr,NorthAmerica_aggr,Europe_aggr)
+
+#merge all data frames in list
+Conflict_agg <- Reduce(function(Month_Yr, value) merge(Month_Yr, value, all=TRUE), Conflict_agg)
+Conflict_agg <- merge(MiddleEast_aggr, Africa_aggr, LatinAmerica_aggr,SouthAsia_aggr,NorthAmerica_aggr,Europe_aggr, by="Month_Yr")
+Conflict_agg<-full_join(MiddleEast_aggr, full_join(Africa_aggr, full_join(LatinAmerica_aggr, full_join(SouthAsia_aggr, full_join(NorthAmerica_aggr, Europe_aggr)))))
+
+full_df = merge(MiddleEast_aggr, Africa_aggr, by = c('Month_Yr', 'value'), all = T)
+full_df2 = merge(full_df, LatinAmerica_aggr, by = "Month_Yr", all = T)
+full_df3 = merge(full_df2, SouthAsia_aggr, by = "Month_Yr", all = T)
+
+df3 <- cbind(MiddleEast_aggr[1], MiddleEast_aggr[-1] + Africa_aggr[-1])
+
+library(dplyr)
+Conflict_agg <- bind_rows(MiddleEast_aggr, Africa_aggr,LatinAmerica_aggr,SouthAsia_aggr,NorthAmerica_aggr,Europe_aggr) %>%
+  group_by(Month_Yr) %>%
+  summarise_all(funs(sum))
+
+tail(Conflict_agg)
+---------------------------
+head(DataOil)
+library(dplyr)
+library(lubridate)
+str(DataOil)
+DataOil <- DataOil %>% 
+  mutate(Date = dmy(Date))
+
+DataOil_new1 <- DataOil
+names(DataOil_new1)
+
+DataOil_new1$Year <- format(as.Date(DataOil_new1$Date), "%Y")
+DataOil_new1$month <- format(as.Date(DataOil_new1$Date), "%m")
+head(DataOil_new1)
+DataOil_new1$Month_Yr <- format(as.Date(DataOil_new1$Date), "%Y-%m")
+
+
+DataOil_aggr <-DataOil_new1 %>%                                        # Specify data frame
+  group_by(Month_Yr) %>%                         # Specify group indicator
+  summarise_at(vars(OILPRICE,WTI_LOG,DX1_LOG,SPX_LOG,GC1_LOG2,GC1_LOG,HO1_LOG),              # Specify column
+               list(name = mean))               
+head(DataOil_aggr)
+tail(DataOil_aggr)
+-------------------------------------------
+
+
+DataOil_all <- merge(DataOil_aggr, Conflict_agg2, by="Month_Yr")
+tail(DataOil_all)
+
+colnames(DataOil_all)[9] <- 'conflict'  
+
+set.seed(123)
+split <- rsample::initial_split(DataOil_all, prop=0.6, strata="OILPRICE_name")
+DataOil.train <- rsample::training(split)
+DataOil.test <- rsample::testing(split)
+lm.fit <- lm(OILPRICE_name ~  DX1_LOG_name+SPX_LOG_name+GC1_LOG_name+conflict, data = DataOil_all)
+summary (lm.fit)
+--------------------
+  lm.fit_pred <- lm(OILPRICE_name ~  DX1_LOG_name+SPX_LOG_name+GC1_LOG_name+conflict, data = DataOil.train)
+summary (lm.fit_pred)
+
+oilpred <- predict(lm.fit_pred, DataOil.test)
+plot(x=predict(lm.fit_pred, DataOil.test), y=DataOil.test$OILPRICE_name,
+     xlab='Predicted Values',
+     ylab='Actual Values',
+     main='Predicted vs. Actual Values')
+abline(coef = coef(lm.fit_pred), col ="red")
+---------------------
+library(caret)
+
+Oilpred<-predict(lm.fit_pred, DataOil.test)
+
+my_data3 <- data.frame(rbind(DataOil.test$OILPRICE_name,Oilpred))
+my_data3
+
+
+
+plot(predict(lm.fit_pred, DataOil.test),                                # Draw plot using Base R
+     DataOil.test$OILPRICE_name,
+     xlab = "Predicted Values",
+     ylab = "Observed Values")
+abline(a = 0,                                        # Add straight line
+       b = 1,
+       col = "red",
+       lwd = 2)
